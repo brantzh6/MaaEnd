@@ -825,6 +825,12 @@ StageResult ZiplineRideMachine::classify(IZiplineObserver& observer, IZiplineAct
             if (landing == LandingClass::AtStrayTower) {
                 discovered_towers_.push_back(reached);
             }
+            if (hop_retry_count_ >= kZiplineHopRetryBudget) {
+                record_.wrong_rope_bearings_deg.push_back(bearing_deg(plan_.mount, reached));
+                LogInfo << "zipline/aim/park_on_wrong_tower" << VAR(reached.x) << VAR(reached.y) << VAR(hop_retry_count_);
+                commitRecord(HopOutcome::WrongRope, now);
+                return parkForReplan(reached, now);
+            }
             origin_ = reached;
             returning_ = true;
             pitch_tier_ = 0;
